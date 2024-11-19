@@ -6,12 +6,14 @@ import { ChevronLeft, ChevronRight, Disc, LoaderCircle, Music, Pause, Play } fro
 import { useParams } from 'react-router-dom';
 import { context } from '../../context/Context.jsx';
 import RangeBox from '../RangeBox.jsx';
+import toast from 'react-hot-toast';
 
 const PlaylistView = () => {
   const [open, setOpen] = useState(false);
   const [playlistItems, setplaylistItems] = useState([]);
-  const { playerDetails, setvideoDetails, videoDetails, progressValue } = useContext(context);
+  const { playerDetails, setvideoDetails, progressValue } = useContext(context);
   const params = useParams();
+  const [page, setpage] = useState(1);
 
   /** this complex logic for getting current song playing index in the list of playlist songs to render play pause icon on that particular song */
   const [currentSongPlaying, setcurrentSongPlaying] = useState({
@@ -56,15 +58,29 @@ const PlaylistView = () => {
   }, []);
 
   /** this function gets all individual video details from the given playlist id WITH CACHING ENABLED  */
-  const fetchPlaylistData = async (idArr) => {
+  const fetchPlaylistData = async (idArr, limit = 10) => {
+    const startIndex = (page - 1) * limit;
+    let endIndex = startIndex + limit;
+
+    if (startIndex >= idArr.length) {
+      // requested index is out of bound
+      // we can toast here no more item
+      toast.error("That's It")
+      return false;
+    }
+    if (endIndex >= idArr.length) {
+      // end index exceed array so set:
+      endIndex = idArr.length;
+    }
+
     const getDATA = (id) => {
       return (fetch(encodeURI(`https://www.youtube.com/oembed?url=https://youtube.com/watch?v=${id}&format=json`)));
     }
-    const promiseArr = []
-    idArr.forEach((id, i) => {
-      if (i < 4) {
-        promiseArr.push(getDATA(id));
-      }
+
+    const promiseArr = [];
+    const tArr = idArr.slice(startIndex, endIndex);
+    tArr.forEach((id, i) => {
+      promiseArr.push(getDATA(id));
     });
 
     const result = await Promise.all(promiseArr);
@@ -78,28 +94,36 @@ const PlaylistView = () => {
 
     // console.log("RESULT", resultArr);
     // set playlistItems 
-    setplaylistItems(resultArr);
+    setplaylistItems([...playlistItems, ...resultArr]);
+    // also increment page number for next fetch
+    setpage(page + 1);
+    // this will be executed once at the start of app as playlist item at start would be empty:
+    if (playlistItems.length <= 0) {
+      setcurrentSongPlaying({
+        index: 0,
+        details: {
+          title: resultArr[0].title,
+          thumbnail: resultArr[0].thumbnail_url
+        }
+      })
+    }
     /** caching here + used while next and prev buttons */
-    sessionStorage.setItem("currPlaylistFetchRes", JSON.stringify(resultArr))
-    // on start need to do once:
-    setcurrentSongPlaying({
-      index: 0,
-      details: {
-        title: resultArr[0].title,
-        thumbnail: resultArr[0].thumbnail_url
-      }
-    })
+    sessionStorage.setItem("currPlaylistFetchRes", JSON.stringify([...playlistItems, ...resultArr]))
   }
 
   useEffect(() => {
     const { state } = playerDetails;
     /** if state 5 then fetch  */
-    if (state === 5 && playlistItems.length <= 0) {
+    if (state === 5 && playlistItems.length <= 0 && !(JSON.parse(sessionStorage.getItem("currPlaylistFetchRes")))) {
       const idArr = playerDetails.getPlaylist();
       fetchPlaylistData(idArr);
     } else {
       const result = JSON.parse(sessionStorage.getItem("currPlaylistFetchRes"));
       if (result) {
+        // calculate page no. based on the stored result: (here 10 is limit)
+        let q = result.length / 10;
+        let pageNo = (q > Math.floor(q)) ? (Math.floor(q) + 2) : (Math.floor(q)+1);
+        setpage(pageNo)
         setplaylistItems(result);
       }
     }
@@ -148,6 +172,14 @@ const PlaylistView = () => {
         </div>)
       })}
 
+      {/* load more button */}
+      {playlistItems && playlistItems.length > 0 && <div className='text-center mt-4'>
+        <button className='btn btn-outline w-36' onClick={() => {
+          const idArr = playerDetails.getPlaylist();
+          fetchPlaylistData(idArr);
+        }}>Load More</button>
+      </div>}
+
 
 
 
@@ -191,14 +223,14 @@ const PlaylistView = () => {
                 </div>
 
                 <div className="progress-bar-container px-1 py-2 cursor-pointer">
-                <RangeBox
-                  min={0} 
-                  max={(playerDetails.duration)} 
-                  progress={progressValue} 
-                  onfinalValueChange={(value)=>{
-                    // console.log("GOT FINAL:",value);
-                    playerDetails.seekTo(Math.floor(value))
-                  }}/>
+                  <RangeBox
+                    min={0}
+                    max={(playerDetails.duration)}
+                    progress={progressValue}
+                    onfinalValueChange={(value) => {
+                      // console.log("GOT FINAL:",value);
+                      playerDetails.seekTo(Math.floor(value))
+                    }} />
                 </div>
 
                 <div className="control-buttons flex w-full justify-evenly mt-2">

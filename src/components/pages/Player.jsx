@@ -44,14 +44,14 @@ const Player = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const { state } = playerDetails;
-    if (state === 1) {
-      sessionStorage.setItem("isPlay", "true");
-    } else if (state === 2) {
-      sessionStorage.setItem("isPlay", "false");
-    }
-  }, [playerDetails.state]);
+  // useEffect(() => {
+  //   const { state } = playerDetails;
+  //   if (state === 1) {
+  //     sessionStorage.setItem("isPlay", "true");
+  //   } else if (state === 2) {
+  //     sessionStorage.setItem("isPlay", "false");
+  //   }
+  // }, [playerDetails.state]);
 
 
   return (
@@ -141,6 +141,7 @@ const Player = () => {
                   {playerDetails.state === 1 && (<button className="control-button"
                     onClick={() => {
                       playerDetails.pause();
+                      sessionStorage.setItem("isPlay", "false");
                     }}>
                     <Pause className='w-8 h-8' />
                   </button>)}
@@ -148,6 +149,7 @@ const Player = () => {
                   {playerDetails.state === 2 && (<button className="control-button"
                     onClick={() => {
                       playerDetails.play();
+                      sessionStorage.setItem("isPlay", "true");
                     }}>
                     <Play className='w-8 h-8' />
                   </button>)}
@@ -159,6 +161,7 @@ const Player = () => {
                   {playerDetails.state === 5 && (<button className="control-button"
                     onClick={() => {
                       playerDetails.play();
+                      sessionStorage.setItem("isPlay", "true");
                     }}>
                     <Play className='w-8 h-8' />
                   </button>)}

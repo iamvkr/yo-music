@@ -10,7 +10,7 @@ const MyCarousel = ({ title, carouselData, setcarouselData, mode }) => {
     
     const getTrendingData = async () => {
         // latest music videos india
-        const keyword = "latest music videos";
+        const keyword = "latest bollywood music videos";
         const url = new URL(baseUrl + "/getSearchResults");
         url.searchParams.append("q", keyword);
         try {
