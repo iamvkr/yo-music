@@ -24,21 +24,9 @@ import Offline from './Offline'
 
 function App() {
 
-  const { playerDetails,user, setuser } = useContext(context);
+  const { playerDetails, user, setuser } = useContext(context);
 
   useEffect(() => {
-    /** BACKGROUND PLAY */
-    const addBackgroundEvent = function () {
-      // console.log("visisblity changed!!!");
-      if (document.visibilityState === "hidden" && sessionStorage.getItem("isPlay") === "true") { //if music was playing
-        setTimeout(function () {
-          // play the video...
-          playerDetails.play();
-        }, 300);
-      }
-    }
-    /** for background play */
-    document.addEventListener("visibilitychange", addBackgroundEvent);
 
     if (user.isLoggedIn === undefined) {
       /** check for login status status */
@@ -57,11 +45,26 @@ function App() {
       })
         .catch((err) => { })
     }
+  }, []);
+
+  useEffect(() => {
+    /** BACKGROUND PLAY */
+    const addBackgroundEvent = function () {
+      // console.log("visisblity changed!!!");
+      if (document.visibilityState === "hidden" && sessionStorage.getItem("isPlay") === "true") { //if music was playing
+        setTimeout(function () {
+          // play the video...
+          playerDetails.play();
+        }, 300);
+      }
+    }
+    /** for background play */
+    document.addEventListener("visibilitychange", addBackgroundEvent);
 
     return () => {
       document.removeEventListener("visibilitychange", addBackgroundEvent);
     }
-  }, []);
+  }, [playerDetails.state]);
 
   return (
     <MobileView>
