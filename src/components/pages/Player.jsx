@@ -61,7 +61,7 @@ const Player = () => {
       {/* song card here */}
       <div className="SongCard my-2 p-2 border rounded-xl shadow dark:shadow-white">
         <div className="flex w-full items-center">
-          <Music className={`w-6 h-6 me-2 ${playerDetails.state === 1 && "animate-pulse" }`} />
+          <Music className={`w-6 h-6 me-2 ${playerDetails.state === 1 && "animate-pulse"}`} />
           <div className="title text-sm w-full text-nowrap text-ellipsis overflow-hidden"
             onClick={() => {
               setOpen(!open);
@@ -74,7 +74,7 @@ const Player = () => {
             {JSON.parse(sessionStorage.getItem("currSongSelect")).title}<br />
             {JSON.parse(sessionStorage.getItem("currSongSelect")).author_name}
           </div>
-          {playerDetails.state === 1 ? <Pause className='w-6 h-6 me-2' />: <Play className='w-6 h-6 me-2' />}
+          {playerDetails.state === 1 ? <Pause className='w-6 h-6 me-2' /> : <Play className='w-6 h-6 me-2' />}
         </div>
       </div>
 
@@ -97,8 +97,8 @@ const Player = () => {
               {/* thumbnail and song title */}
               <div>
                 <div className="imageContainer">
-                  <img src={JSON.parse(sessionStorage.getItem("currSongSelect")).thumbnails.mqdefault} 
-                  className='h-40 object-cover w-full rounded-2xl' alt="music" />
+                  <img src={JSON.parse(sessionStorage.getItem("currSongSelect")).thumbnails.mqdefault}
+                    className='h-40 object-cover w-full rounded-2xl' alt="music" />
                 </div>
                 <div className="titleContainer mt-4">
                   <h3 className='text-xl font-bold text-center overflow-hidden text-nowrap text-ellipsis'>
@@ -123,14 +123,14 @@ const Player = () => {
                 </div>
 
                 <div className="progress-bar-container px-1 py-2 cursor-pointer">
-                  <RangeBox 
-                  min={0} 
-                  max={playerDetails.duration} 
-                  progress={progressValue < playerDetails.duration ? progressValue : 0} 
-                  onfinalValueChange={(value)=>{
-                    // console.log("GOT FINAL:",value);
-                    playerDetails.seekTo(Math.floor(value))
-                  }}/>
+                  <RangeBox
+                    min={0}
+                    max={playerDetails.duration ? (playerDetails.duration <= 0 ? 10 : playerDetails.duration) : 10}
+                    progress={progressValue < playerDetails.duration ? progressValue : 0}
+                    onfinalValueChange={(value) => {
+                      // console.log("GOT FINAL:",value);
+                      playerDetails.seekTo(Math.floor(value))
+                    }} />
                 </div>
 
                 <div className="control-buttons flex w-full justify-evenly mt-2">

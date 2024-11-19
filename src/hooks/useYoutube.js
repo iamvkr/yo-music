@@ -59,7 +59,7 @@ export const useYoutube = ({ id, type, options }) => {
         id: "",
         state: -1,
         title: "",
-        duration: "",
+        duration: 10,
         /** actions: */
         play: () => { },
         pause: () => { },
